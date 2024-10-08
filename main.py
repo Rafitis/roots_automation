@@ -28,8 +28,14 @@ st.title("Shopify Orders to Excel")
 
 spectra = st.file_uploader("upload file", type={"csv", "txt"})
 if spectra is not None:
+    number = st.number_input(
+        "Último pedido", value=None, placeholder="Type a number..."
+    )
+    if not number:
+        number = 1
+
     spectra_df = pd.read_csv(spectra)
-    final_data = transform_data(spectra_df)
+    final_data = transform_data(spectra_df, last_order=number)
 
     st.dataframe(final_data)
 

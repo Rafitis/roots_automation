@@ -6,7 +6,7 @@ def get_data():
     return pd.read_csv("./INPUT/orders_export.csv")
 
 
-def transform_data(data: DataFrame):
+def transform_data(data: DataFrame, last_order: int = 1) -> DataFrame:
     # Elimino duplicados y los totales a cero.
     data = data.drop_duplicates(subset=["Name"])
     data = data.drop(data[data["Total"] == 0].index)
@@ -76,6 +76,9 @@ def transform_data(data: DataFrame):
             "País de venta",
         ]
     ]
+
+    # Se cambia Facutra por el último pedido
+    new_data["Factura"] = range(last_order + len(new_data) - 1, last_order - 1, -1)
 
     return new_data
 
