@@ -3,7 +3,6 @@ from pandas import DataFrame
 
 
 def get_data():
-    # https://drive.google.com/file/d/1kexD0y7sn6yBOoDA5VnUPOZb7HNjJ93F/view?usp=drive_link
     return pd.read_csv("./INPUT/orders_export.csv")
 
 
