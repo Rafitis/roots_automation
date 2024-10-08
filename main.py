@@ -44,7 +44,7 @@ st.set_page_config(
 
 st.title("Shopify Orders to Excel")
 
-spectra = st.file_uploader("upload file", type={"csv", "txt"})
+spectra = st.file_uploader("upload file", type={"csv"})
 if spectra is not None:
     number = st.number_input(
         "Último pedido", value=None, placeholder="Type a number...", format="%0.0f"
