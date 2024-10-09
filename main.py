@@ -42,26 +42,39 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-st.title("Shopify Orders to Excel")
+password = st.text_input("Password", type="password")
+# st.markdown(
+#     """
+#     <style>
+#         [title="Show password text"] {
+#             display: none;
+#         }
+#     </style>
+#     """,
+#     unsafe_allow_html=True,
+# )
 
-spectra = st.file_uploader("upload file", type={"csv"})
-if spectra is not None:
-    number = st.number_input(
-        "Último pedido", value=None, placeholder="Type a number...", format="%0.0f"
-    )
-    if not number:
-        number = 1
+if password == st.secrets["MAIN_PASSWORD"]:
+    st.title("Shopify Orders to Excel")
 
-    spectra_df = pd.read_csv(spectra)
-    final_data = transform_data(spectra_df, last_order=int(number))
+    spectra = st.file_uploader("upload file", type={"csv"})
+    if spectra is not None:
+        number = st.number_input(
+            "Último pedido", value=None, placeholder="Type a number...", format="%0.0f"
+        )
+        if not number:
+            number = 1
 
-    st.dataframe(final_data)
+        spectra_df = pd.read_csv(spectra)
+        final_data = transform_data(spectra_df, last_order=int(number))
 
-    doc = convert_df(final_data)
+        st.dataframe(final_data)
 
-    st.download_button(
-        label="Download as Excel",
-        data=doc,
-        file_name="Listado Facturas.xlsx",
-        mime="application/vnd.ms-excel",
-    )
+        doc = convert_df(final_data)
+
+        st.download_button(
+            label="Download as Excel",
+            data=doc,
+            file_name="Listado Facturas.xlsx",
+            mime="application/vnd.ms-excel",
+        )
