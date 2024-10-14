@@ -16,13 +16,19 @@ def convert_df(df):
     workbook = writer.book
     ws = writer.sheets["Facturas"]
 
-    format_cell = workbook.add_format({"bg_color": "#92D050"})
+    format_cell_no_spain = workbook.add_format({"bg_color": "#92D050"})
+    format_cell_no_data = workbook.add_format({"bg_color": "#db1e13"})
     columns_format = workbook.add_format().set_text_wrap()
-    # Seleccionar las filas donde "País de venta" es diferente de "ES"
     i = 1
     for index, _ in df.iterrows():
+        # Si algún campo es nulo, poner la linea en rojo.
+        if df.loc[index, "Nombre Cliente"] == "":
+            ws.set_row(i, 18, format_cell_no_data)
+
+        # Seleccionar las filas donde "País de venta" es diferente de "ES"
         if df.loc[index, "País de venta"] != "ES":
-            ws.set_row(i, 18, format_cell)
+            ws.set_row(i, 18, format_cell_no_spain)
+
         i += 1
 
     ws.set_default_row(18)
@@ -43,16 +49,7 @@ st.set_page_config(
 )
 
 password = st.text_input("Password", type="password")
-# st.markdown(
-#     """
-#     <style>
-#         [title="Show password text"] {
-#             display: none;
-#         }
-#     </style>
-#     """,
-#     unsafe_allow_html=True,
-# )
+
 
 if password == st.secrets["MAIN_PASSWORD"]:
     st.title("Shopify Orders to Excel")

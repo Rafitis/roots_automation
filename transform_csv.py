@@ -18,6 +18,9 @@ def transform_data(data: DataFrame, last_order: int = 1) -> DataFrame:
     # Si no existe Shipping Name Coger el Billing Name
     data["Shipping Name"] = data["Shipping Name"].fillna(data["Billing Name"])
 
+    # Si no existe pais de procedencia poner ES.
+    data["Billing Country"] = data["Billing Country"].fillna("ES")
+
     # Columnas que me interesan
     new_data = data[
         [
@@ -79,7 +82,7 @@ def transform_data(data: DataFrame, last_order: int = 1) -> DataFrame:
 
     # Se cambia Facutra por el último pedido
     new_data["Factura"] = range(last_order + len(new_data) - 1, last_order - 1, -1)
-
+    new_data["Nombre Cliente"] = new_data["Nombre Cliente"].fillna("")
     return new_data
 
 
