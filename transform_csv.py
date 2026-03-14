@@ -12,7 +12,7 @@ def _get_year_from_date(date_str: str) -> int:
 
 def transform_data(data: DataFrame, last_order: int = 1) -> DataFrame:
     # Elimino duplicados y los totales a cero.
-    data = data.drop_duplicates(subset=["Name"])
+    data = data.drop_duplicates(subset=["Name"]).copy()
     data = data.drop(data[data["Total"] == 0].index)
 
     # Elimniar espacios en blanco
