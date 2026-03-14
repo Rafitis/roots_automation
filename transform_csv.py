@@ -6,6 +6,10 @@ def get_data():
     return pd.read_csv("./INPUT/orders_export.csv")
 
 
+def _get_year_from_date(date_str: str) -> int:
+    return int(date_str.split("-")[0])
+
+
 def transform_data(data: DataFrame, last_order: int = 1) -> DataFrame:
     # Elimino duplicados y los totales a cero.
     data = data.drop_duplicates(subset=["Name"])
@@ -81,7 +85,11 @@ def transform_data(data: DataFrame, last_order: int = 1) -> DataFrame:
     ]
 
     # Se cambia Facutra por el último pedido
-    new_data["Factura"] = range(last_order + len(new_data) - 1, last_order - 1, -1)
+    current_year = _get_year_from_date(new_data["Fecha"].iloc[0])
+    new_data["Factura"] = [
+        f"{current_year}-{i}"
+        for i in range(last_order + len(new_data) - 1, last_order - 1, -1)
+    ]
     new_data["Nombre Cliente"] = new_data["Nombre Cliente"].fillna("")
     return new_data
 
@@ -94,7 +102,7 @@ if __name__ == "__main__":
     print(new_data.head())
     print(len(new_data.index))
 
-    gt_data = pd.read_excel("./OUTPUT/Listado Facturas Septiembre 2024.xlsx")
+    gt_data = pd.read_excel("./OUTPUT/Listado de Facturas emitidas Febrero 26.xlsx")
     print(gt_data.head())
     print(len(gt_data.index))
 
