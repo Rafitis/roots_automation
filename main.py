@@ -36,7 +36,7 @@ def convert_df(df):
     ws.set_column(2, 7, 10, cell_format=columns_format)
     ws.set_column(8, 8, 30)
     ws.set_column(9, 9, 10, cell_format=columns_format)
-    writer._save()
+    writer.close()
     processed_data = output.getvalue()
     return processed_data
 
@@ -59,7 +59,7 @@ if password == st.secrets["MAIN_PASSWORD"]:
         number = st.number_input(
             "Último pedido", value=None, placeholder="Type a number...", format="%0.0f"
         )
-        if not number:
+        if number is None:
             number = 1
 
         spectra_df = pd.read_csv(spectra)
@@ -75,3 +75,5 @@ if password == st.secrets["MAIN_PASSWORD"]:
             file_name="Listado Facturas.xlsx",
             mime="application/vnd.ms-excel",
         )
+elif password:
+    st.error("Contraseña incorrecta")
