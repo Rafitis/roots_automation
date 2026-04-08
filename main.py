@@ -18,24 +18,27 @@ def convert_df(df):
 
     format_cell_no_spain = workbook.add_format({"bg_color": "#92D050"})
     format_cell_no_data = workbook.add_format({"bg_color": "#db1e13"})
-    columns_format = workbook.add_format().set_text_wrap()
     i = 1
     for index, _ in df.iterrows():
-        # Si algún campo es nulo, poner la linea en rojo.
-        if df.loc[index, "Nombre Cliente"] == "":
+        # Rojo: nombre vacío o país no-ES con IVA 0% (exportación)
+        if df.loc[index, "Nombre Cliente"] == "" or (
+            df.loc[index, "IVA (%)"] == 0 and df.loc[index, "País de venta"] != "ES"
+        ):
             ws.set_row(i, 18, format_cell_no_data)
-
-        # Seleccionar las filas donde "País de venta" es diferente de "ES"
-        if df.loc[index, "País de venta"] != "ES":
+        # Verde: país diferente de ES
+        elif df.loc[index, "País de venta"] != "ES":
             ws.set_row(i, 18, format_cell_no_spain)
 
         i += 1
 
+    # Anchos de columna: A=Nombre Cliente, B=Factura, C=NIF, D=Fecha, E-L=resto
     ws.set_default_row(18)
-    ws.set_column(1, 1, 30)
-    ws.set_column(2, 7, 10, cell_format=columns_format)
-    ws.set_column(8, 8, 30)
-    ws.set_column(9, 9, 10, cell_format=columns_format)
+    ws.set_column(0, 0, 30)  # Nombre Cliente
+    ws.set_column(1, 1, 15)  # Factura
+    ws.set_column(2, 2, 15)  # NIF SOCIEDAD
+    ws.set_column(3, 3, 12)  # Fecha
+    ws.set_column(4, 9, 15)  # IVA(%) a CUENTA INGRESO
+    ws.set_column(10, 11, 12)  # País de venta, Moneda
     writer.close()
     processed_data = output.getvalue()
     return processed_data
