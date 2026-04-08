@@ -2,6 +2,20 @@ import pandas as pd
 from pandas import DataFrame
 
 
+IVA_POR_PAIS = {
+    "ES": 21,
+    "FR": 20,
+    "DE": 19,
+    "IT": 22,
+    "PT": 23,
+    "BE": 21,
+    "NL": 21,
+    "AT": 20,
+    "IE": 23,
+    "LU": 17,
+}
+
+
 def get_data():
     return pd.read_csv("./INPUT/orders_export.csv")
 
@@ -33,8 +47,6 @@ def transform_data(
             "Name",
             "Paid at",
             "Currency",
-            "Shipping",
-            "Taxes",
             "Total",
             "Shipping Name",
             "Billing Country",
@@ -47,8 +59,6 @@ def transform_data(
             "Name": "Factura",
             "Paid at": "Fecha",
             "Currency": "Moneda",
-            "Shipping": "Envío",
-            "Taxes": "IVA",
             "Total": "Total",
             "Shipping Name": "Nombre Cliente",
             "Billing Country": "País de venta",
@@ -62,33 +72,30 @@ def transform_data(
     # Fecha: solo fecha, sin hora ni timezone
     new_data.loc[:, "Fecha"] = pd.to_datetime(new_data["Fecha"]).dt.strftime("%Y-%m-%d")
 
-    # Envio SIN IVA = Envio / 1.21
-    new_data.loc[:, "Envío sin IVA"] = round(new_data["Envío"] / 1.21, 2)
+    # IVA (%) según país de venta. Si no está en la lista → 0% (exportación)
+    new_data.loc[:, "IVA (%)"] = new_data["País de venta"].map(IVA_POR_PAIS).fillna(0).astype(int)
 
-    # Envio sin IVA = (Total - (Envio SIN IVA * 0.21) - Envio SIN IVA) / (1 + 0.21)
-    new_data.loc[:, "Subtotal sin IVA"] = round(
-        (
-            new_data["Total"]
-            - (new_data["Envío sin IVA"] * 0.21)
-            - new_data["Envío sin IVA"]
-        )
-        / (1 + 0.21),
-        2,
+    # BASE IMPONIBLE = Total / (1 + IVA/100)
+    new_data.loc[:, "BASE IMPONIBLE"] = round(
+        new_data["Total"] / (1 + new_data["IVA (%)"] / 100), 2
     )
+
+    # IVA (€) = Total - BASE IMPONIBLE
+    new_data.loc[:, "IVA (€)"] = round(new_data["Total"] - new_data["BASE IMPONIBLE"], 2)
 
     # Reordenar columnas
     new_data = new_data[
         [
-            "Factura",
-            "Fecha",
-            "Moneda",
-            "Subtotal sin IVA",
-            "Envío",
-            "Envío sin IVA",
-            "IVA",
-            "Total",
             "Nombre Cliente",
+            "Factura",
+            "NIF SOCIEDAD",
+            "Fecha",
+            "IVA (%)",
+            "BASE IMPONIBLE",
+            "IVA (€)",
+            "Total",
             "País de venta",
+            "Moneda",
         ]
     ]
 
