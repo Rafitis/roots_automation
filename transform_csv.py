@@ -17,7 +17,7 @@ IVA_POR_PAIS = {
 
 
 def get_data():
-    return pd.read_csv("./INPUT/orders_export.csv")
+    return pd.read_csv("./INPUT/orders_export_marzo.csv")
 
 
 def _get_year_from_date(date_str: str) -> int:
@@ -51,7 +51,7 @@ def transform_data(
             "Shipping Name",
             "Billing Country",
         ]
-    ]
+    ].copy()
 
     # Cambio de nombres
     new_data.rename(
@@ -70,10 +70,14 @@ def transform_data(
     new_data.loc[:, "NIF SOCIEDAD"] = nif_sociedad
 
     # Fecha: solo fecha, sin hora ni timezone
-    new_data.loc[:, "Fecha"] = pd.to_datetime(new_data["Fecha"]).dt.strftime("%Y-%m-%d")
+    new_data.loc[:, "Fecha"] = pd.to_datetime(new_data["Fecha"], utc=True).dt.strftime(
+        "%Y-%m-%d"
+    )
 
     # IVA (%) según país de venta. Si no está en la lista → 0% (exportación)
-    new_data.loc[:, "IVA (%)"] = new_data["País de venta"].map(IVA_POR_PAIS).fillna(0).astype(int)
+    new_data.loc[:, "IVA (%)"] = (
+        new_data["País de venta"].map(IVA_POR_PAIS).fillna(0).astype(int)
+    )
 
     # BASE IMPONIBLE = Total / (1 + IVA/100)
     new_data.loc[:, "BASE IMPONIBLE"] = round(
@@ -81,7 +85,9 @@ def transform_data(
     )
 
     # IVA (€) = Total - BASE IMPONIBLE
-    new_data.loc[:, "IVA (€)"] = round(new_data["Total"] - new_data["BASE IMPONIBLE"], 2)
+    new_data.loc[:, "IVA (€)"] = round(
+        new_data["Total"] - new_data["BASE IMPONIBLE"], 2
+    )
 
     # CUENTA CLIENTE siempre fija
     new_data.loc[:, "CUENTA CLIENTE"] = 43000000
@@ -91,11 +97,11 @@ def transform_data(
     new_data.loc[
         (new_data["País de venta"] != "ES") & (new_data["IVA (%)"] != 0),
         "CUENTA INGRESO",
-    ] = 700000001
+    ] = 70000001
     new_data.loc[
         (new_data["País de venta"] != "ES") & (new_data["IVA (%)"] == 0),
         "CUENTA INGRESO",
-    ] = 700000002
+    ] = 70000002
 
     # Reordenar columnas
     new_data = new_data[
@@ -118,7 +124,7 @@ def transform_data(
     # Se cambia Facutra por el último pedido
     current_year = _get_year_from_date(new_data["Fecha"].iloc[0])
     new_data["Factura"] = [
-        f"{current_year}-{i}"
+        f"{current_year}-{i:05d}"
         for i in range(last_order + len(new_data) - 1, last_order - 1, -1)
     ]
     new_data["Nombre Cliente"] = new_data["Nombre Cliente"].fillna("")
@@ -133,7 +139,7 @@ if __name__ == "__main__":
     print(new_data.head())
     print(len(new_data.index))
 
-    gt_data = pd.read_excel("./OUTPUT/Listado de Facturas emitidas Febrero 26.xlsx")
+    gt_data = pd.read_excel("./OUTPUT/Listado Facturas emitidas Marzo.xlsx")
     print(gt_data.head())
     print(len(gt_data.index))
 
