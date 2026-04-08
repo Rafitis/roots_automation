@@ -10,7 +10,9 @@ def _get_year_from_date(date_str: str) -> int:
     return int(date_str.split("-")[0])
 
 
-def transform_data(data: DataFrame, last_order: int = 1) -> DataFrame:
+def transform_data(
+    data: DataFrame, last_order: int = 1, nif_sociedad: str = ""
+) -> DataFrame:
     # Elimino duplicados y los totales a cero.
     data = data.drop_duplicates(subset=["Name"]).copy()
     data = data.drop(data[data["Total"] == 0].index)
@@ -53,6 +55,9 @@ def transform_data(data: DataFrame, last_order: int = 1) -> DataFrame:
         },
         inplace=True,
     )
+
+    # NIF SOCIEDAD
+    new_data.loc[:, "NIF SOCIEDAD"] = nif_sociedad
 
     # Fecha: solo fecha, sin hora ni timezone
     new_data.loc[:, "Fecha"] = pd.to_datetime(new_data["Fecha"]).dt.strftime("%Y-%m-%d")

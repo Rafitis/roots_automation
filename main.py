@@ -63,7 +63,7 @@ if password == st.secrets["MAIN_PASSWORD"]:
             number = 1
 
         spectra_df = pd.read_csv(spectra)
-        final_data = transform_data(spectra_df, last_order=int(number))
+        final_data = transform_data(spectra_df, last_order=int(number), nif_sociedad=st.secrets["NIF_SOCIEDAD"])
 
         st.dataframe(final_data)
 
