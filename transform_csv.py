@@ -54,6 +54,9 @@ def transform_data(data: DataFrame, last_order: int = 1) -> DataFrame:
         inplace=True,
     )
 
+    # Fecha: solo fecha, sin hora ni timezone
+    new_data.loc[:, "Fecha"] = pd.to_datetime(new_data["Fecha"]).dt.strftime("%Y-%m-%d")
+
     # Envio SIN IVA = Envio / 1.21
     new_data.loc[:, "Envío sin IVA"] = round(new_data["Envío"] / 1.21, 2)
 
