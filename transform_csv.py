@@ -83,6 +83,20 @@ def transform_data(
     # IVA (€) = Total - BASE IMPONIBLE
     new_data.loc[:, "IVA (€)"] = round(new_data["Total"] - new_data["BASE IMPONIBLE"], 2)
 
+    # CUENTA CLIENTE siempre fija
+    new_data.loc[:, "CUENTA CLIENTE"] = 43000000
+
+    # CUENTA INGRESO según país e IVA
+    new_data.loc[:, "CUENTA INGRESO"] = 70000000  # Por defecto: España
+    new_data.loc[
+        (new_data["País de venta"] != "ES") & (new_data["IVA (%)"] != 0),
+        "CUENTA INGRESO",
+    ] = 700000001
+    new_data.loc[
+        (new_data["País de venta"] != "ES") & (new_data["IVA (%)"] == 0),
+        "CUENTA INGRESO",
+    ] = 700000002
+
     # Reordenar columnas
     new_data = new_data[
         [
@@ -94,6 +108,8 @@ def transform_data(
             "BASE IMPONIBLE",
             "IVA (€)",
             "Total",
+            "CUENTA CLIENTE",
+            "CUENTA INGRESO",
             "País de venta",
             "Moneda",
         ]
