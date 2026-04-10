@@ -34,17 +34,22 @@ def transform_refunds(data: DataFrame, last_devolucion: int = 1) -> DataFrame:
     )
 
     # Fila de totales
-    totals_row = {col: "" for col in result.columns}
-    totals_row["created"] = "DEVOLUCIONES"
-    totals_row["aux"] = ""
-    totals_row["amount"] = ""
-    totals_row["TOTAL"] = result["TOTAL"].sum()
-    totals_row["BASE IMPONIBLE"] = result["BASE IMPONIBLE"].sum()
-    totals_row["IVA"] = result["IVA"].sum()
-    totals_row["CUENTA CLIENTE"] = ""
-    totals_row["currency"] = result["currency"].iloc[0]
+    totals_row = {
+        "id - Devolucion": None,
+        "order_number": None,
+        "created": "DEVOLUCIONES",
+        "aux": None,
+        "amount": None,
+        "TOTAL": result["TOTAL"].sum(),
+        "BASE IMPONIBLE": result["BASE IMPONIBLE"].sum(),
+        "IVA": result["IVA"].sum(),
+        "CUENTA CLIENTE": None,
+        "currency": result["currency"].iloc[0],
+    }
 
-    result = result.astype({"aux": object, "CUENTA CLIENTE": object})
-    return pd.concat(
+    result = pd.concat(
         [result, DataFrame([totals_row])], ignore_index=True
     )
+    result["aux"] = pd.to_numeric(result["aux"], errors="coerce")
+    result["CUENTA CLIENTE"] = pd.to_numeric(result["CUENTA CLIENTE"], errors="coerce")
+    return result
